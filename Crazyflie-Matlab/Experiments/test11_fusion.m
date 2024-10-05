@@ -10,9 +10,10 @@ addpath('../../Crazyflie-Matlab');
 addpath('../../Robotat');
 
 %% Conexión dron, robotat y actualización de posición inicial
+agent_id = 50; % Número de marker dentro del Robotat 
+dron_id = 8; % Número de dron para su dirección URI
+
 robotat = robotat_connect();
-agent_id = 50; 
-dron_id = 8; 
 crazyflie_1 = crazyflie_connect(dron_id);
 
 %% Desconexión
@@ -21,7 +22,6 @@ crazyflie_disconnect(crazyflie_1);
 
 %% Actualización de posición inicial
 pose = robotat_get_pose(robotat, agent_id);
-disp(pose);
 crazyflie_set_position(crazyflie_1, pose(1), pose(2), pose(3));
 
 %% Despegue y actualización manual
@@ -78,4 +78,4 @@ for i = 1:num_iterations
 end
 
 crazyflie_land(crazyflie_1);
-%crazyflie_disconnect(crazyflie_1);
+crazyflie_disconnect(crazyflie_1);

@@ -55,7 +55,7 @@ plot3(post_obstacle(1), post_obstacle(2), post_obstacle(3), 'go', 'MarkerSize', 
 
 % Trayectoria e interpolación
 trajectory_points = [takeoff_point; pre_obstacle; obstacle_point(1:3); post_obstacle; final_point];
-n_interp = 6; 
+n_interp = 20; 
 t = 1:size(trajectory_points, 1); 
 t_interp = linspace(1, t(end), n_interp); 
 x_interp = interp1(t, trajectory_points(:, 1), t_interp, 'pchip');
