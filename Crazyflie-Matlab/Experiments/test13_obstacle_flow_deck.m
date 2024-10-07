@@ -16,6 +16,8 @@ takeoff_point = origin(1:3) + [0,0,0.3];
 obstacle_point = [0, 0, 0.3, 0, 0, deg2rad(0)]; 
 final_point = [0.3, 0, 0.3];
 
+obstacle1_id = 11; 
+
 % Geometría del obstáculo
 diameter = 0.27;
 radius = diameter / 2;

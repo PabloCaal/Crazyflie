@@ -12,7 +12,7 @@ addpath('../../Robotat');
 %% Generación de trayectoria circular con origen fijo
 origin = [0,0,0];
 circle_center = origin(1:3) + [0, 0, 0.5];
-N = 30;
+N = 25;
 radio = 0.35;
 theta = linspace(0, 2*pi, N);  
 x = circle_center(1) + radio * cos(theta);
@@ -30,7 +30,7 @@ view(3);
 
 %% Ejecución de vuelo en Crazyflie con Flow Deck
 dron_id = 8;    
-velocity = 1.0;
+velocity = 1.1;
 crazyflie_1 = crazyflie_connect(dron_id);
 crazyflie_takeoff(crazyflie_1, 0.5, 1.0);
 pause(1);

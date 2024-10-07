@@ -14,38 +14,39 @@ addpath('../../Robotat');
 robotat = robotat_connect();
 
 %% Lectura de markers en obstáculos y generación de trayectoria
-agent_id = 14;  
+agent_id = 12;  
 obstacle1_id = 11; 
-goal_id = 12;
+goal_id = 14;
 
 origin = robotat_get_pose(robotat, agent_id,"eulxyz");
 obstacle1_point = robotat_get_pose(robotat, obstacle1_id,"eulxyz");
 final_point = robotat_get_pose(robotat, goal_id,"eulxyz");
-final_point(3) = final_point(3) + 0.2;
+final_point(3) = final_point(3) + 0.3;
 
-% Offset para marker 11 en obstáculo
+% Offset para marer 11 en obstáculo
 obstacle1_point(6) = mod(obstacle1_point(6), 360);
 obstacle1_point(6) = obstacle1_point(6) - 201;
 if obstacle1_point(6) < 0
     obstacle1_point(6) = obstacle1_point(6) + 360;
 end
 
+takeoff_point = origin(1:3) + [0,0,0.2];
+
 save data_obstacle_1.mat origin final_point obstacle1_point
+
 obstacle_point = obstacle1_point;
 
-% Generación de trayectoria interpolada
+%% Generación de trayectoria interpolada
 % Geometría del obstáculo
-diameter = 0.23;
-radius = diameter/2;
+diameter = 0.27;
+radius = diameter / 2;
 obstacle_point(3) = obstacle_point(3) - radius;
 theta = linspace(0, 2*pi, 7); 
 hexagon_y = radius * cos(theta); 
 hexagon_z = radius * sin(theta) + obstacle_point(3); 
 apply_yaw = @(x, y, yaw) [cos(yaw) -sin(yaw); sin(yaw) cos(yaw)] * [x; y];
-yaw_obstacle = deg2rad(obstacle_point(6));  % Ángulo de yaw en radianes
+yaw_obstacle = obstacle_point(6);  % Ángulo de yaw en radianes
 rotated_hexagon = apply_yaw(zeros(size(hexagon_y)), hexagon_y, yaw_obstacle);
-
-takeoff_point = origin(1:3) + [0,0,obstacle1_point(3) - radius];
 
 obstacle_distance = 0.15;  
 pre_obstacle = obstacle_point(1:3) - obstacle_distance * [cos(yaw_obstacle), sin(yaw_obstacle), 0];
@@ -75,14 +76,14 @@ plot3(post_obstacle(1), post_obstacle(2), post_obstacle(3), 'go', 'MarkerSize', 
 
 % Trayectoria e interpolación
 trajectory_points = [takeoff_point(1:3); pre_obstacle(1:3); obstacle_point(1:3); post_obstacle(1:3); final_point(1:3)];
-n_interp = 15; 
+n_interp = 20; 
 t = 1:size(trajectory_points, 1); 
 t_interp = linspace(1, t(end), n_interp); 
-x = interp1(t, trajectory_points(:, 1), t_interp, 'pchip');
-y = interp1(t, trajectory_points(:, 2), t_interp, 'pchip');
-z = interp1(t, trajectory_points(:, 3), t_interp, 'pchip');
-plot3(x, y, z, 'm-', 'LineWidth', 2); % Línea suave
-plot3(x, y, z, 'ko', 'MarkerSize', 5, 'MarkerFaceColor', 'k'); % Puntos interpolados
+x_interp = interp1(t, trajectory_points(:, 1), t_interp, 'pchip');
+y_interp = interp1(t, trajectory_points(:, 2), t_interp, 'pchip');
+z_interp = interp1(t, trajectory_points(:, 3), t_interp, 'pchip');
+plot3(x_interp, y_interp, z_interp, 'm-', 'LineWidth', 2); % Línea suave
+plot3(x_interp, y_interp, z_interp, 'ko', 'MarkerSize', 5, 'MarkerFaceColor', 'k'); % Puntos interpolados
 
 % Configurar los ejes
 xlabel('X [m]');
@@ -98,56 +99,10 @@ view(3);
 hold off;
 
 % Generar el array de la trayectoria sin el primer punto
-x_interp = x(2:end);
-y_interp = y(2:end);
-z_interp = z(2:end);
+x_interp = x_interp(2:end);
+y_interp = y_interp(2:end);
+z_interp = z_interp(2:end);
 trajectory = [x_interp', y_interp', z_interp'];
-
-%% Seguimiento de trayectoria
-% Despegue
-velocity = 1.0;
-crazyflie_takeoff(crazyflie_1, 0.5, velocity);
-try
-    pose = robotat_get_pose(robotat, agent_id, "eulxyz");
-    crazyflie_set_position(crazyflie_1, pose(1), pose(2), pose(3));
-catch
-    disp("Error al actualizar posición")
-end
-pause(0.5);
-
-% Seguimiento de la trayectoria
-crazyflie_move_to_position(crazyflie_1, x(1), y(1), z(1), velocity);
-try
-    pose = robotat_get_pose(robotat, agent_id, "eulxyz");
-    crazyflie_set_position(crazyflie_1, pose(1), pose(2), pose(3));
-catch
-    disp("Error al actualizar posición")
-end
-pause(0.5);
-
-for i = 1:N
-    crazyflie_move_to_position(crazyflie_1, x(i), y(i), z(i), velocity);
-    %pause(0.01);
-    try
-        pose = robotat_get_pose(robotat, agent_id, "eulxyz");
-        crazyflie_set_position(crazyflie_1, pose(1), pose(2), pose(3));
-    catch
-        disp("Error al actualizar posición")
-    end
-end
-
-crazyflie_move_to_position(crazyflie_1, center(1), center(2), center(3), velocity);
-try
-    pose = robotat_get_pose(robotat, agent_id, "eulxyz");
-    crazyflie_set_position(crazyflie_1, pose(1), pose(2), pose(3));
-catch
-    disp("Error al actualizar posición")
-end
-
-% Aterrizaje
-crazyflie_land(crazyflie_1);
-% Desconexión
-crazyflie_disconnect(crazyflie_1);
 
 
 %% Ejecución de prueba de 9despegue y aterrizaje

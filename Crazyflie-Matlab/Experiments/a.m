@@ -3,7 +3,10 @@
 % Pablo Javier Caal Leiva - 20538
 % -------------------------------------------------------------------------
 % Prueba de seguimiento de trayectoria circular en Crazyflie con fusión de
-% sensores: Flow Deck + Sistema de Captura de Movimiento
+% sensores: Flow Deck + Sistema de Captura de Movimiento}
+
+% Funicionamiento más o menos decente pero se puede mejorar
+
 % =========================================================================
 
 %% Añadir al path las carpetas de comandos usando una ruta relativa
@@ -23,7 +26,7 @@ crazyflie_set_position(crazyflie_1, origin(1), origin(2), origin(3));
 
 center = origin(1:3) + [0, 0, 0.5];
 
-N = 50; % Cantidad de puntos en la trayectoria circular
+N = 20; % Cantidad de puntos en la trayectoria circular
 r = 0.3; % Radio de la trayectoria circular
 theta = linspace(0, 2*pi, N);  
 x = center(1) + r * cos(theta);
@@ -42,7 +45,7 @@ view(3);
 
 %% Ejecución de trayectoria circular
 % Despegue
-velocity = 1.2;
+velocity = 1.1;
 crazyflie_takeoff(crazyflie_1, 0.5, 1.0);
 try
     pose = robotat_get_pose(robotat, agent_id, "eulxyz");
@@ -72,7 +75,6 @@ for i = 1:N
         disp("Error al actualizar posición")
     end
 end
-
 crazyflie_move_to_position(crazyflie_1, center(1), center(2), center(3), velocity);
 try
     pose = robotat_get_pose(robotat, agent_id, "eulxyz");
